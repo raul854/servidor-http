@@ -1,16 +1,28 @@
 import http from 'node:http'
-const PORT = 3000
+import { URL } from 'node:url'
+
+const porta = 3000
 
 const server = http.createServer();
 
-server.on('request', (req, res) => {
-    console.log(`[${new Date().toISOString()}] Requisição recebida! ${req.method} ${req.url}`);
+const requisicao = (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.statusCode = 200
+    const urlObj = new URL(req.url, `http://${req.headers.host}`);
 
-    res.statusCode = 201;
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    res.end('Recurso criado!');
-});
+    if (req.method === 'GET' && urlObj.pathname === '/saudacao') {
+        const nome = urlObj.searchParams.get('nome');
+        return res.end(JSON.stringify({ "nome": nome }));
+    }
 
-server.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`)
-})
+    return res.end(JSON.stringify({ "chave": "valor" }));
+
+    console.log(`Requisição recebida! ${req.method} ${req.url}`);
+    res.end();
+}
+
+server.on('request', requisicao);
+
+server.listen(porta, () => {
+    console.log(`Servidor ouvindo na porta ${porta}`)
+});			
